@@ -3,12 +3,12 @@
 /* Commands */
 #define CMD_MEASURE_HUMIDITY_HOLD       0xE5
 #define CMD_MEASURE_HUMIDITY_NO_HOLD    0xF5
-#define CMD_MEASURE_TEMPERATURE_HOLD	  0xE3
+#define CMD_MEASURE_TEMPERATURE_HOLD	0xE3
 #define CMD_MEASURE_TEMPERATURE_NO_HOLD 0xF3
 #define CMD_MEASURE_THERMISTOR_HOLD     0xEE
 #define CMD_READ_PREVIOUS_TEMPERATURE   0xE0
 #define CMD_RESET                       0xFE
-#define CMD_WRITE_REGISTER_1		        0xE6
+#define CMD_WRITE_REGISTER_1		0xE6
 #define CMD_READ_REGISTER_1             0xE7
 #define CMD_WRITE_REGISTER_2            0x50
 #define CMD_READ_REGISTER_2             0x10
@@ -18,7 +18,7 @@
 #define CMD_READ_COEFFICIENT            0x84
 
 /* User Register 1 */
-#define REG1_RESOLUTION_MASK	  0x81
+#define REG1_RESOLUTION_MASK	0x81
 #define REG1_RESOLUTION_H12_T14 0x00
 #define REG1_RESOLUTION_H08_T12 0x01
 #define REG1_RESOLUTION_H10_T13 0x80
@@ -38,13 +38,13 @@
 /* Device Identification */
 #define ID_SAMPLE 0xFF
 #define ID_SI7006 0x06
-#define ID_SI7013	0x0D
-#define ID_SI7020	0x14
-#define ID_SI7021	0x15
+#define ID_SI7013 0x0D
+#define ID_SI7020 0x14
+#define ID_SI7021 0x15
 
 /* Coefficients */
-#define COEFFICIENT_BASE	0x82
-#define COEFFICIENT_COUNT	9
+#define COEFFICIENT_BASE  0x82
+#define COEFFICIENT_COUNT 9
 
 /* Thermistor Correction Coefficients */
 static struct {
