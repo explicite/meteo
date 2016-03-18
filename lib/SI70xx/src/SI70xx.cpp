@@ -3,12 +3,12 @@
 /* Commands */
 #define CMD_MEASURE_HUMIDITY_HOLD       0xE5
 #define CMD_MEASURE_HUMIDITY_NO_HOLD    0xF5
-#define CMD_MEASURE_TEMPERATURE_HOLD	0xE3
+#define CMD_MEASURE_TEMPERATURE_HOLD    0xE3
 #define CMD_MEASURE_TEMPERATURE_NO_HOLD 0xF3
 #define CMD_MEASURE_THERMISTOR_HOLD     0xEE
 #define CMD_READ_PREVIOUS_TEMPERATURE   0xE0
 #define CMD_RESET                       0xFE
-#define CMD_WRITE_REGISTER_1		0xE6
+#define CMD_WRITE_REGISTER_1            0xE6
 #define CMD_READ_REGISTER_1             0xE7
 #define CMD_WRITE_REGISTER_2            0x50
 #define CMD_READ_REGISTER_2             0x10
@@ -18,7 +18,7 @@
 #define CMD_READ_COEFFICIENT            0x84
 
 /* User Register 1 */
-#define REG1_RESOLUTION_MASK	0x81
+#define REG1_RESOLUTION_MASK    0x81
 #define REG1_RESOLUTION_H12_T14 0x00
 #define REG1_RESOLUTION_H08_T12 0x01
 #define REG1_RESOLUTION_H10_T13 0x80
@@ -70,11 +70,11 @@ int SI70xx::init(u8 SDA, u8 SCL) {
     _SCL = SCL;
     return 0;
   } else {
-    return 1;
+    return -1;
   }
 };
 
-int SI70xx::getDeviceId(u8 *id) {
+int SI70xx::getDeviceId(u8* id) {
 	u8 buf[6];
 	int  error;
 
@@ -105,7 +105,7 @@ int SI70xx::getHumidity() {
   if (value < 0) return value;
 
   /* Convert the value to milli-percent (pcm) relative humidity */
-	value = ((value*15625)>>13)-6000;
+	value = ((value * 15625) >> 13) - 6000;
 
   /* Limit the humidity to valid values */
 	if (value < 0) {
@@ -128,7 +128,7 @@ int SI70xx::getTemperature() {
     if (value < 0) return value;
 
     /* Convert the value to millidegrees Celsius */
-    temperature = ((value*21965)>>13)-46850;
+    temperature = ((value * 21965) >> 13) - 46850;
 
     return temperature;
 }
@@ -145,7 +145,7 @@ int SI70xx::_measure(u8 cmd) {
 	return ((data[0] * 256) + data[1]) & ~3;
 }
 
-int SI70xx::_writeReg(u8 * reg, u8 reglen) {
+int SI70xx::_writeReg(u8* reg, u8 reglen) {
     Wire.beginTransmission(_ADDR);
     for(int i = 0; i < reglen; i++) {
         reg += i;
@@ -154,7 +154,7 @@ int SI70xx::_writeReg(u8 * reg, u8 reglen) {
     return Wire.endTransmission();
 }
 
-int SI70xx::_readReg(u8 * reg, u8 reglen) {
+int SI70xx::_readReg(u8* reg, u8 reglen) {
     Wire.requestFrom(_ADDR, reglen);
     while(Wire.available() < reglen) {
     }
@@ -164,7 +164,7 @@ int SI70xx::_readReg(u8 * reg, u8 reglen) {
     return Wire.endTransmission();
 }
 
-int SI70xx::_command(u8 cmd, u8 * buf) {
+int SI70xx::_command(u8 cmd, u8* buf) {
     int error;
     error = _writeReg(&cmd, sizeof cmd);
     if(error < 0) return error;

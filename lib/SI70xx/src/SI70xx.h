@@ -6,11 +6,11 @@
 
 class SI70xx {
   public:
-     SI70xx(u8 ADDR);
-     int init(u8 SDA, u8 SCL);
-     int getDeviceId(u8 *id);
-     int getHumidity();
-     int getTemperature();
+    SI70xx(u8 ADDR);
+    int init(u8 SDA, u8 SCL);
+    int getDeviceId(u8 *id);
+    int getHumidity();
+    int getTemperature();
   private:
     bool _exists;
     u8 _ADDR;
