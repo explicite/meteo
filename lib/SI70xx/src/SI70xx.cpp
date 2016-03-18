@@ -1,4 +1,4 @@
-#include "SI70xx.h"
+#include "SI70xx.hpp"
 
 /* Commands */
 #define CMD_MEASURE_HUMIDITY_HOLD       0xE5
