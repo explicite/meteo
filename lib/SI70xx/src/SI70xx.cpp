@@ -59,7 +59,7 @@ static struct {
 
 SI70xx::SI70xx(u8 ADDR) {
   _ADDR = ADDR;
-};
+}
 
 int SI70xx::init(u8 SDA, u8 SCL) {
   Wire.begin(SDA, SCL);
@@ -72,7 +72,7 @@ int SI70xx::init(u8 SDA, u8 SCL) {
   } else {
     return -1;
   }
-};
+}
 
 int SI70xx::getDeviceId(u8* id) {
 	u8 buf[6];
