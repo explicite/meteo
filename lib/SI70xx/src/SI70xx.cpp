@@ -146,28 +146,28 @@ int SI70xx::_measure(u8 cmd) {
 }
 
 int SI70xx::_writeReg(u8* reg, u8 reglen) {
-    Wire.beginTransmission(_ADDR);
-    for(int i = 0; i < reglen; i++) {
-        reg += i;
-        Wire.write(*reg);
-    }
-    return Wire.endTransmission();
+  Wire.beginTransmission(_ADDR);
+  for(int i = 0; i < reglen; i++) {
+      reg += i;
+      Wire.write(*reg);
+  }
+  return Wire.endTransmission();
 }
 
 int SI70xx::_readReg(u8* reg, u8 reglen) {
-    Wire.requestFrom(_ADDR, reglen);
-    while(Wire.available() < reglen) {
-    }
-    for(int i = 0; i < reglen; i++) {
-        reg[i] = Wire.read();
-    }
-    return Wire.endTransmission();
+  Wire.requestFrom(_ADDR, reglen);
+  while(Wire.available() < reglen) {
+  }
+  for(int i = 0; i < reglen; i++) {
+      reg[i] = Wire.read();
+  }
+  return Wire.endTransmission();
 }
 
 int SI70xx::_command(u8 cmd, u8* buf) {
-    int error;
-    error = _writeReg(&cmd, sizeof cmd);
-    if(error < 0) return error;
-    delay(25);
-    return _readReg(buf, 0x02);
+  int error;
+  error = _writeReg(&cmd, sizeof cmd);
+  if(error < 0) return error;
+  delay(25);
+  return _readReg(buf, 0x02);
 }
