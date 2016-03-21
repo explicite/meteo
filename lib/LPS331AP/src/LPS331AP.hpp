@@ -8,6 +8,8 @@ class LPS331AP {
   public:
     LPS331AP(u8 ADDR);
     int init(u8 SDA, u8 SCL);
+    int powerOff();
+    int powerOn();
   private:
     bool _exists;
     u8 _ADDR;

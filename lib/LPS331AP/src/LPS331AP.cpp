@@ -95,6 +95,82 @@
 #define LPS331AP_DEVICE_NAME "lps331ap"
 #define LPS331AP_DEVICE_ID	 0xbb
 
+int LPS331AP::init(u8 SDA, u8 SCL) {
+    Wire.begin(SDA, SCL);
+    Wire.beginTransmission(_ADDR);
+    if (Wire.endTransmission() == 0) {
+      _exists = true;
+      _SDA = SDA;
+      _SCL = SCL;
+
+      int error;
+      u8 value;
+
+      error = _command(WHO_AM_I, 0x01, &value);
+      if (error < 0) return error;
+
+      if (LPS331AP_DEVICE_ID != value) return -1;
+
+      error = _writeReg((u8*) RES_CONF, sizeof RES_CONF);
+      if (error < 0) return error;
+
+      u8* cmd = (u8*) 0x34;
+      error = _writeReg(cmd, sizeof cmd);
+      if (error < 0) return error;
+
+      error = _writeReg((u8*) CTRL_REG1, sizeof CTRL_REG1);
+      if (error < 0) return error;
+
+      error = _writeReg((u8*) POWER_DOWN, sizeof POWER_DOWN);
+      if (error < 0) return error;
+
+      error = _writeReg((u8*) CTRL_REG1, sizeof CTRL_REG1);
+      if (error < 0) return error;
+
+      cmd = (u8*) (POWER_DOWN | ODR7 | INT_CIRCUIT_DISABLE
+        | BLOCK_DATA_UPDATE	| DELTA_P_DISABLE);
+
+      error = _writeReg(cmd, sizeof cmd);
+
+      return error;
+    } else {
+      return -1;
+    }
+}
+
+int LPS331AP::powerOff() {
+  int error;
+  u8 value;
+
+  error = _command(CTRL_REG1, 0x01, &value);
+  if (error < 0) return error;
+
+  value &= ~POWER_ON;
+
+  error = _writeReg((u8*) CTRL_REG1, sizeof CTRL_REG1);
+  if (error < 0) return error;
+
+  error = _writeReg(&value, sizeof value);
+
+  return error;
+}
+
+int LPS331AP::powerOn() {
+  int error;
+  u8 value;
+
+  error = _command(CTRL_REG1, 0x01, &value);
+  if (error < 0) return error;
+
+  value |= POWER_ON;
+
+  error = _writeReg((u8*) CTRL_REG1, sizeof CTRL_REG1);
+  if (error < 0) return error;
+
+  error = _writeReg(&value, sizeof value);
+
+  return error;
+}
 
 int LPS331AP::_writeReg(u8* reg, u8 reglen) {
   Wire.beginTransmission(_ADDR);
