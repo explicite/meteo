@@ -95,11 +95,15 @@
 #define LPS331AP_DEVICE_NAME "lps331ap"
 #define LPS331AP_DEVICE_ID	 0xbb
 
+LPS331AP::LPS331AP(u8 ADDR) {
+  _ADDR = ADDR;
+}
+
 int LPS331AP::init(u8 SDA, u8 SCL) {
     Wire.begin(SDA, SCL);
     Wire.beginTransmission(_ADDR);
     if (Wire.endTransmission() == 0) {
-      _exists = true;
+
       _SDA = SDA;
       _SCL = SCL;
 
@@ -111,34 +115,68 @@ int LPS331AP::init(u8 SDA, u8 SCL) {
 
       if (LPS331AP_DEVICE_ID != value) return -1;
 
-      error = _writeReg((u8*) RES_CONF, sizeof RES_CONF);
+      error = _writeByte(RES_CONF, 0x34);
       if (error < 0) return error;
 
-      u8* cmd = (u8*) 0x34;
-      error = _writeReg(cmd, sizeof cmd);
+      error = _writeByte(CTRL_REG1, POWER_DOWN);
       if (error < 0) return error;
 
-      error = _writeReg((u8*) CTRL_REG1, sizeof CTRL_REG1);
-      if (error < 0) return error;
+      error = _writeByte(CTRL_REG1, POWER_DOWN | ODR7 | INT_CIRCUIT_DISABLE |
+        BLOCK_DATA_UPDATE	| DELTA_P_DISABLE);
 
-      error = _writeReg((u8*) POWER_DOWN, sizeof POWER_DOWN);
-      if (error < 0) return error;
-
-      error = _writeReg((u8*) CTRL_REG1, sizeof CTRL_REG1);
-      if (error < 0) return error;
-
-      cmd = (u8*) (POWER_DOWN | ODR7 | INT_CIRCUIT_DISABLE
-        | BLOCK_DATA_UPDATE	| DELTA_P_DISABLE);
-
-      error = _writeReg(cmd, sizeof cmd);
-
+      if (error >= 0) {
+        _exists = true;
+      }
       return error;
     } else {
       return -1;
     }
 }
 
-int LPS331AP::powerOff() {
+int LPS331AP::enable() {
+  int error;
+  error = _powerOn();
+
+  if (error < 0) return error;
+
+  _enabled = true;
+}
+
+int LPS331AP::disable() {
+  int error;
+  error = _powerOff();
+
+  if (error < 0) return error;
+
+  _enabled = false;
+}
+
+int LPS331AP::isExists() {
+  return _exists;
+}
+
+int LPS331AP::isEnabled() {
+  return _enabled;
+}
+
+float LPS331AP::getPressure() {
+  int error;
+  s32 pressure;
+  error = _pressure(&pressure);
+  if (error < 0) return error;
+
+  return pressure / 4096.0;
+}
+
+float LPS331AP::getTemperature() {
+  int error;
+  s32 temperature;
+  error = _temperature(&temperature);
+  if (error < 0) return error;
+  return 42.5 + (- ( (65535-temperature) + 1) / 480);
+}
+
+int LPS331AP::_powerOff() {
   int error;
   u8 value;
 
@@ -147,15 +185,12 @@ int LPS331AP::powerOff() {
 
   value &= ~POWER_ON;
 
-  error = _writeReg((u8*) CTRL_REG1, sizeof CTRL_REG1);
-  if (error < 0) return error;
-
-  error = _writeReg(&value, sizeof value);
+  error = _writeByte(CTRL_REG1, value);
 
   return error;
 }
 
-int LPS331AP::powerOn() {
+int LPS331AP::_powerOn() {
   int error;
   u8 value;
 
@@ -164,10 +199,7 @@ int LPS331AP::powerOn() {
 
   value |= POWER_ON;
 
-  error = _writeReg((u8*) CTRL_REG1, sizeof CTRL_REG1);
-  if (error < 0) return error;
-
-  error = _writeReg(&value, sizeof value);
+  error = _writeByte(CTRL_REG1, value);
 
   return error;
 }
@@ -191,27 +223,40 @@ int LPS331AP::_readReg(u8* reg, u8 reglen) {
   return Wire.endTransmission();
 }
 
-int LPS331AP::_command(u8 cmd, u8 reglen, u8* buf) {
+int LPS331AP::_writeByte(u8 command, u8 value) {
+  Wire.beginTransmission(_ADDR);
+  Wire.write(command);
+  Wire.write(value);
+
+  return Wire.endTransmission();
+}
+
+int LPS331AP::_command(u8 cmd, u8 reglen, u8* reg) {
   int error;
   error = _writeReg(&cmd, sizeof cmd);
   if(error < 0) return error;
   delay(25);
-  return _readReg(buf, reglen);
+  return _readReg(reg, reglen);
 }
 
-int LPS331AP::_mesure(s32* data) {
+int LPS331AP::_pressure(s32* data) {
   int error;
   u8 buf[3] = { 0 };
 
   error = _command(PRESS_OUT_XL | I2C_AUTO_INC, 0x03, buf);
   if (error < 0) return error;
 
-  data[0] = (s8)buf[2] << 16 | buf[1] << 8 | buf[0];
+  *data = buf[2] << 16 | buf[1] << 8 | buf[0];
+  return 0;
+}
+
+int LPS331AP::_temperature(s32* data) {
+  int error;
+  u8 buf[2] = { 0 };
 
   error = _command(TEMP_OUT_L | I2C_AUTO_INC, 0x02, buf);
   if (error < 0) return error;
 
-  data[1] = (s8)buf[1] << 8 | buf[0];
-
+  *data = buf[1] << 8 | buf[0];
   return 0;
 }
