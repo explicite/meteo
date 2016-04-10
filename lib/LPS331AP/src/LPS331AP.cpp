@@ -173,7 +173,7 @@ float LPS331AP::getTemperature() {
   s32 temperature;
   error = _temperature(&temperature);
   if (error < 0) return error;
-  return 42.5 + (- ( (65535-temperature) + 1) / 480);
+  return 42.5 + (- ( (65535-temperature) + 1) / 480.0);
 }
 
 int LPS331AP::_powerOff() {
